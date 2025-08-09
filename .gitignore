@@ -1,0 +1,33 @@
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+
+# Ignore logs
+.logs
+
+# Ignore virtual environments
+venv/
+env/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE/editor folders
+.vscode/
+.idea/
+
+# Ignore compiled files
+*.exe
+*.dll
+*.so
+*.pyd
+
+# Ignore test coverage files
+htmlcov/
+.coverage
+.tox/
+.nox/
+
+# Ignore pip environment files
+pip-log.txt

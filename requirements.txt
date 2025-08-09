@@ -1,0 +1,4 @@
+tk
+pystray
+Pillow
+python-json-logger

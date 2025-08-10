@@ -22,7 +22,7 @@ from pythonjsonlogger import jsonlogger
 class JsonFormatter(jsonlogger.JsonFormatter):
     def add_fields(self, log_record, record, message_dict):
         super().add_fields(log_record, record, message_dict)
-        log_record['@time'] = datetime.now(timezone.utc).isoformat()
+        log_record['timestamp'] = datetime.now(timezone.utc).isoformat()
         log_record['logger'] = record.name
         log_record['line'] = record.lineno
         log_record['function'] = record.funcName
@@ -285,7 +285,7 @@ class PingMonitor:
     def process_results(self):
         try:
             result = self.result_queue.get_nowait()
-            # logger.info(f"Processing result: {result}", extra={"result": result})
+            logger.info(f"Processing result: {result}", extra={"result": result})
             name = result["name"]
             self.results[name].append(result)
 
@@ -296,7 +296,7 @@ class PingMonitor:
                     condition = "Disconnected"
                     avg_delay = None
                     color = "#FF0000"  # Red
-                    logger.warning(f"2 or more failed pings for {name}", extra={"target_name": name, "failed_pings": failed_pings})
+                    logger.warning(f"2 or more failed pings for {name}", extra={"target_name": name, "status": "Disconnected"})
                 else:
                     delays = [r["delay"] for r in recent_results if r["delay"] is not None]
                     if delays:

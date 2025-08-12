@@ -253,18 +253,38 @@ class PingMonitorGUI:
             )
 
     def update_tray_icon(self):
-    # Get worst status (prioritize disconnected states)
-        if any(self.status.values()):  # ✅ Fixed: NOT any = all disconnected
-            color = '#ff4444'  # All disconnected - red
-        else:
-            color = '#44ff44'  # All connected - green
-            
+        current_time = time.time()
     
-        self.tray_icon.icon = self.create_tray_icon(color)
-
+        # Debounce rapid updates
+        if hasattr(self, '_last_icon_update') and \
+        (current_time - self._last_icon_update) < 1.0:
+            return
+    
+        try:
+            # Count connected/disconnected services
+            connected_services = [name for name, status in self.status.items() if status]
+            disconnected_services = [name for name, status in self.status.items() if not status]
         
+            # Red if ANY is disconnected
+            all_connected = len(disconnected_services) == 0
         
-        self.tray_icon.icon = self.create_tray_icon(color)
+            if all_connected:
+                color = '#44ff44'  # Green
+                tooltip = "Network Monitor - All services connected"
+            else:
+                color = '#ff4444'  # Red
+                tooltip = f"Network Monitor - {len(disconnected_services)} service(s) down: {', '.join(disconnected_services)}"
+        
+            # Update icon if changed
+            if not hasattr(self, '_last_tray_color') or self._last_tray_color != color:
+                new_icon = self.create_tray_icon(color)
+                self.tray_icon.icon = new_icon
+                self.tray_icon.title = tooltip  # Update tooltip
+                self._last_tray_color = color
+                self._last_icon_update = current_time
+            
+        except Exception as e:
+            print(f"Tray icon update error: {e}")
 
     def show_notification(self, title, message):
         try:
@@ -307,7 +327,7 @@ class PingMonitorGUI:
                         )
                 
                 last_status = new_status.copy()
-                time.sleep(2)  # Check every 7 seconds (between 5-10 as requested)
+                time.sleep(2)
                 
             except Exception as e:
                 print(f"Monitor error: {e}")
